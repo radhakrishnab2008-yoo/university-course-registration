@@ -1,9 +1,22 @@
 import dotenv from 'dotenv'; dotenv.config();
+import type { RequestHandler } from 'express';
 import express from 'express'; import cors from 'cors'; import helmet from 'helmet'; import session from 'express-session'; import MySQLStoreFactory from 'express-mysql-session'; import bcrypt from 'bcryptjs'; import {z} from 'zod'; import {RowDataPacket} from 'mysql2'; import {pool} from './db.js';
 declare module 'express-session' { interface SessionData { user?: {id:number;role:'student'|'faculty'|'admin';name:string;email:string;studentId?:number;facultyId?:number} } }
 const app=express(); const port=Number(process.env.PORT??4000); const MySQLStore=MySQLStoreFactory(session);
 app.use(helmet()); app.use(cors({origin:process.env.FRONTEND_ORIGIN??'http://localhost:5173',credentials:true})); app.use(express.json());
-app.use(session({name:'university.sid',secret:process.env.SESSION_SECRET??'dev-only-change-this-secret',resave:false,saveUninitialized:false,store:new MySQLStore({},pool as any),cookie:{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',maxAge:28800000}}));
+app.use(session({
+  name: 'university.sid',
+  secret: process.env.SESSION_SECRET ?? 'dev-only-change-this-secret',
+  resave: false,
+  saveUninitialized: false,
+  store: new MySQLStore({}, pool as any),
+  cookie: {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 28800000
+  }
+}) as any);
 const wrap=(fn:any)=>(req:any,res:any,next:any)=>Promise.resolve(fn(req,res,next)).catch(next);
 const auth=(req:any,res:any,next:any)=>req.session.user?next():res.status(401).json({error:'Please sign in.'});
 const role=(...roles:string[])=>(req:any,res:any,next:any)=>req.session.user&&roles.includes(req.session.user.role)?next():res.status(403).json({error:'Access denied.'});
