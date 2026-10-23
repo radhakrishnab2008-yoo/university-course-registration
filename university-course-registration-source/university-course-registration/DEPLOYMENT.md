@@ -1,0 +1,2 @@
+# Deployment
+Deploy the frontend build (`frontend/dist`) to static hosting and the backend to a Node.js host. Provision managed MySQL 8 and import the SQL scripts. Configure `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `SESSION_SECRET`, `FRONTEND_ORIGIN`, and `VITE_API_URL` for the chosen hosts. Set HTTPS, configure CORS/cookies for your exact domain, and point DNS records to the frontend host. Never commit secrets or use demo credentials in production. Provider-specific DNS records vary.
