@@ -1,7 +1,16 @@
 import dotenv from 'dotenv'; dotenv.config();
 import type { RequestHandler } from 'express';
 import express from 'express'; import cors from 'cors'; import helmet from 'helmet'; import session from 'express-session'; import MySQLStoreFactory from 'express-mysql-session'; import bcrypt from 'bcryptjs'; import {z} from 'zod'; import {RowDataPacket} from 'mysql2'; import {pool} from './db.js';
-declare module 'express-session' { interface SessionData { user?: {id:number;role:'student'|'faculty'|'admin';name:string;email:string;studentId?:number;facultyId?:number} } }
+declare module 'express-session' {
+  interface SessionData {
+    user?: {
+      id: number;
+      role: string;
+      student_id?: number;
+      faculty_id?: number;
+    };
+  }
+}
 const app=express(); const port=Number(process.env.PORT??4000); const MySQLStore=MySQLStoreFactory(session);
 app.use(helmet()); app.use(cors({origin:process.env.FRONTEND_ORIGIN??'http://localhost:5173',credentials:true})); app.use(express.json());
 app.use(session({
